@@ -1,3 +1,4 @@
 *.swp
 output-*
+vbox_output*
 packer_cache*

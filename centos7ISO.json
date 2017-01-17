@@ -15,7 +15,9 @@
       "ssh_wait_timeout": "5000s",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
-      "ssh_pty" : true
+      "ssh_pty" : true,
+      "vm_name": "packer-virtualbox-iso-centos7",
+      "output_directory": "vbox_output"
     }
   ]
 }
