@@ -1,23 +1,109 @@
 {
-  "builders": [
-    {
-      "type": "virtualbox-iso",
-      "guest_os_type": "RedHat_64",
-      "iso_url": "/mnt/extra/OSISOs/CentOS-7-x86_64-Minimal-1511.iso",
-      "iso_checksum": "88c0437f0a14c6e2c94426df9d43cd67",
-      "iso_checksum_type": "md5",
-      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
-      "http_directory": "http",
-      "boot_command": [
-        "<tab><leftCtrlOn>u<leftCtrlOff>",
-        "vmlinuz initrd=initrd.img text ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks.cfg<enter>"
-      ],
-      "ssh_wait_timeout": "5000s",
-      "ssh_username": "vagrant",
-      "ssh_password": "vagrant",
-      "ssh_pty" : true,
-      "vm_name": "packer-virtualbox-iso-centos7",
-      "output_directory": "vbox_output"
-    }
-  ]
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "guest_os_type": "RedHat_64",
+            "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+            "iso_url": "/mnt/extra/OSISOs/CentOS-7-x86_64-Minimal-1511.iso",
+            "iso_checksum": "88c0437f0a14c6e2c94426df9d43cd67",
+            "iso_checksum_type": "md5",
+            "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+            "http_directory": "http",
+            "boot_command": [
+                "<tab><leftCtrlOn>u<leftCtrlOff>",
+                "vmlinuz initrd=initrd.img text ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks.cfg<enter>"
+            ],
+            "virtualbox_version_file": ".vbox_version",
+            "disk_size": "2048",
+            "ssh_wait_timeout": "5000s",
+            "ssh_username": "vagrant",
+            "ssh_password": "vagrant",
+            "ssh_pty" : true,
+            "vm_name": "packer-virtualbox-iso-centos7",
+            "output_directory": "vbox_output",
+            "name": "virtualbox-iso",
+            "headless": true,
+            "vboxmanage": [
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--memory",
+                    "1024"
+                ],
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--cpus",
+                    "1"
+                ]
+            ]
+        },
+
+        {
+            "type": "qemu",
+            "iso_url": "/mnt/extra/OSISOs/CentOS-7-x86_64-Minimal-1511.iso",
+            "iso_checksum": "88c0437f0a14c6e2c94426df9d43cd67",
+            "iso_checksum_type": "md5",
+            "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+            "http_directory": "http",
+            "http_port_min": 10082,
+            "http_port_max": 10089,
+            "ssh_host_port_min": 2222,
+            "ssh_host_port_max": 2229,
+            "boot_command": [
+                "<tab><leftCtrlOn>u<leftCtrlOff>",
+                "vmlinuz initrd=initrd.img text ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks.cfg<enter>"
+            ],
+            "disk_size": "2048",
+            "format": "qcow2",
+            "accelerator": "kvm",
+            "ssh_wait_timeout": "5000s",
+            "ssh_username": "vagrant",
+            "ssh_password": "vagrant",
+            "ssh_pty" : true,
+            "vm_name": "packer-qemu-iso-centos7",
+            "net_device": "virtio-net",
+            "disk_interface": "virtio",
+            "output_directory": "qemu_output",
+            "name": "qemu-iso",
+            "headless": true,
+            "qemuargs": [
+                [
+                    "-m",
+                    "1024M"
+                ],
+                [
+                    "-cpu",
+                    "host"
+                ],
+                [
+                    "-smp",
+                    1
+                ]
+            ]
+        }
+    ],
+
+    "provisioners": [
+        {
+            "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+            "only": [
+                "virtualbox-iso"
+            ],
+            "scripts": [
+                "scripts/rhel/dependencies.sh",
+                "scripts/common/vagrant.sh",
+                "scripts/common/vboxga.sh"
+            ],
+            "type": "shell"
+        },
+        {
+            "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+            "scripts": [
+                "scripts/common/packages.sh",
+                "scripts/common/cleanup.sh"
+            ],
+            "type": "shell"
+        }
+    ]
 }
