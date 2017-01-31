@@ -3,3 +3,5 @@ output-*
 vbox_output*
 qemu_output*
 packer_cache*
+builds/*
+*.log

@@ -8,3 +8,4 @@ wget --no-check-certificate \
     -O /home/$OS_USER/.ssh/authorized_keys
 chown -R $OS_USER /home/$OS_USER/.ssh
 chmod -R go-rwsx /home/$OS_USER/.ssh
+echo 'vagrant  ALL=(ALL)  NOPASSWD:ALL' >> /etc/sudoers

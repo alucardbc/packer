@@ -14,7 +14,7 @@
                 "vmlinuz initrd=initrd.img text ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks.cfg<enter>"
             ],
             "virtualbox_version_file": ".vbox_version",
-            "disk_size": "2048",
+            "disk_size": "5120",
             "ssh_wait_timeout": "5000s",
             "ssh_username": "vagrant",
             "ssh_password": "vagrant",
@@ -54,7 +54,7 @@
                 "<tab><leftCtrlOn>u<leftCtrlOff>",
                 "vmlinuz initrd=initrd.img text ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks.cfg<enter>"
             ],
-            "disk_size": "2048",
+            "disk_size": "5120",
             "format": "qcow2",
             "accelerator": "kvm",
             "ssh_wait_timeout": "5000s",
@@ -87,23 +87,44 @@
     "provisioners": [
         {
             "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+            "scripts": [
+                "scripts/rhel/preparation.sh",
+                "scripts/rhel/updateos.sh"
+            ],
+            "expect_disconnect": true,
+            "type": "shell"
+        },
+        {
+            "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
             "only": [
                 "virtualbox-iso"
             ],
             "scripts": [
                 "scripts/rhel/dependencies.sh",
                 "scripts/common/vagrant.sh",
-                "scripts/common/vboxga.sh"
+                "scripts/common/vboxga.sh",
+                "scripts/rhel/dependclean.sh"
             ],
             "type": "shell"
         },
         {
             "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
             "scripts": [
-                "scripts/common/packages.sh",
+                "scripts/rhel/packages.sh",
                 "scripts/common/cleanup.sh"
             ],
             "type": "shell"
+        }
+    ],
+
+    "post-processors": [
+        {
+            "only": [
+                "virtualbox-iso"
+            ],
+            "output": "./builds/{{.Provider}}/centos-7.2.box",
+            "type": "vagrant",
+            "vagrantfile_template": "templates/rhel.template"
         }
     ]
 }
